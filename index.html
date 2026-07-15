@@ -610,7 +610,7 @@ function applyNight(isNight){
   document.getElementById('dn-thumb').innerHTML = isNight
     ? `<svg viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z" fill="#5b6f8c"/></svg>`
     : `<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" fill="#ffb84d"/><g stroke="#ffb84d" stroke-width="1.8" stroke-linecap="round"><path d="M12 2v2.5M12 19.5V22M22 12h-2.5M4.5 12H2M18.5 5.5L16.8 7.2M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2L5.5 5.5"/></g></svg>`;
-  refreshChartsForTheme();
+  if (typeof lastRainData !== "undefined" && lastRainData) refreshChartsForTheme();
 }
 function updateDayNightAuto(){
   if(manualOverride) return;
