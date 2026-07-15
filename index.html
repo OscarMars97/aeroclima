@@ -505,10 +505,45 @@ const TAB_META = {
   lluvia:{icon:ICONS.drop, label:'Lluvia'},
   alertas:{icon:ICONS.bell, label:'Alertas'},
 };
-document.querySelectorAll('.tab-btn').forEach(btn=>{
-  const meta = TAB_META[btn.dataset.tab];
-  btn.innerHTML = meta.icon + `<span>${meta.label}</span>` + (btn.dataset.tab==='alertas' ? '<span class="alert-dot" id="alert-dot"></span>' : '');
-});
+
+/* ============================================================
+   VARIABLES GLOBALES
+   Todas las variables de estado de la app se declaran aquí,
+   ANTES de cualquier función que las use, para evitar
+   "Cannot access '...' before initialization".
+   ============================================================ */
+const MODELS = [
+  { id: 'ecmwf_ifs025', label: 'ECMWF', hex:'#2f8fe0' },
+  { id: 'gfs_seamless', label: 'GFS', hex:'#2fc98f' },
+  { id: 'icon_seamless', label: 'ICON', hex:'#ffb648' },
+  { id: 'gem_seamless', label: 'GEM', hex:'#a578e8' },
+  { id: 'ukmo_seamless', label: 'UKMO', hex:'#ff7a7a' },
+  { id: 'meteofrance_seamless', label: 'Météo-France', hex:'#28d6c8' },
+];
+
+let manualOverride = false;
+let current = { lat: -28.4835296, lon: -71.2492527, name: 'Huasco, Atacama, Chile' };
+let hourlyChart = null;
+let horasChart = null;
+let lastRainData = null;
+let lastGeneralData = null;
+let lastRangeDays = 7;
+
+/* ============================================================
+   RENDER DE ÍCONOS DE PESTAÑAS
+   Se ejecuta desde initApp(), una vez que el DOM está listo.
+   ============================================================ */
+function renderTabIcons(){
+  try{
+    document.querySelectorAll('.tab-btn').forEach(btn=>{
+      const meta = TAB_META[btn.dataset.tab];
+      if(!meta) return;
+      btn.innerHTML = meta.icon + `<span>${meta.label}</span>` + (btn.dataset.tab==='alertas' ? '<span class="alert-dot" id="alert-dot"></span>' : '');
+    });
+  }catch(e){
+    console.error('renderTabIcons:', e);
+  }
+}
 
 function weatherIcon(mm){
   if(mm >= 12) return ICONS.cloudLightning;
@@ -577,50 +612,57 @@ function animateGauges(){
    FONDO ANIMADO + SPLASH + MODO DÍA/NOCHE
    ============================================================ */
 function initBackground(){
-  const cloudLayer = document.getElementById('cloud-layer');
-  for(let i=0;i<6;i++){
-    const c = document.createElement('div');
-    c.className = 'cloud';
-    const size = 90 + Math.random()*160;
-    c.style.width = size + 'px'; c.style.height = size*0.55 + 'px';
-    c.style.top = (Math.random()*55) + '%'; c.style.left = '-25vw';
-    c.style.animationDuration = (55 + Math.random()*45) + 's';
-    c.style.animationDelay = (-Math.random()*60) + 's';
-    cloudLayer.appendChild(c);
-  }
-  const bubbleLayer = document.getElementById('bubble-layer');
-  for(let i=0;i<30;i++){
-    const b = document.createElement('div');
-    b.className = 'bokeh';
-    const size = 5 + Math.random()*22;
-    b.style.width = size + 'px'; b.style.height = size + 'px';
-    b.style.left = (Math.random()*100) + '%'; b.style.bottom = (-10 - Math.random()*20) + '%';
-    b.style.setProperty('--op', (0.25 + Math.random()*0.5).toFixed(2));
-    b.style.setProperty('--drift', (Math.random()*80 - 40) + 'px');
-    b.style.animationDuration = (14 + Math.random()*22) + 's, ' + (3+Math.random()*3) + 's';
-    b.style.animationDelay = (-Math.random()*30) + 's, ' + (-Math.random()*4) + 's';
-    bubbleLayer.appendChild(b);
+  try{
+    const cloudLayer = document.getElementById('cloud-layer');
+    for(let i=0;i<6;i++){
+      const c = document.createElement('div');
+      c.className = 'cloud';
+      const size = 90 + Math.random()*160;
+      c.style.width = size + 'px'; c.style.height = size*0.55 + 'px';
+      c.style.top = (Math.random()*55) + '%'; c.style.left = '-25vw';
+      c.style.animationDuration = (55 + Math.random()*45) + 's';
+      c.style.animationDelay = (-Math.random()*60) + 's';
+      cloudLayer.appendChild(c);
+    }
+    const bubbleLayer = document.getElementById('bubble-layer');
+    for(let i=0;i<30;i++){
+      const b = document.createElement('div');
+      b.className = 'bokeh';
+      const size = 5 + Math.random()*22;
+      b.style.width = size + 'px'; b.style.height = size + 'px';
+      b.style.left = (Math.random()*100) + '%'; b.style.bottom = (-10 - Math.random()*20) + '%';
+      b.style.setProperty('--op', (0.25 + Math.random()*0.5).toFixed(2));
+      b.style.setProperty('--drift', (Math.random()*80 - 40) + 'px');
+      b.style.animationDuration = (14 + Math.random()*22) + 's, ' + (3+Math.random()*3) + 's';
+      b.style.animationDelay = (-Math.random()*30) + 's, ' + (-Math.random()*4) + 's';
+      bubbleLayer.appendChild(b);
+    }
+  }catch(e){
+    console.error('initBackground:', e);
   }
 }
 
-let manualOverride = false;
 function applyNight(isNight){
-  document.body.classList.toggle('night', isNight);
-  document.getElementById('daynight-switch').classList.toggle('is-night', isNight);
-  document.getElementById('dn-thumb').innerHTML = isNight
-    ? `<svg viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z" fill="#5b6f8c"/></svg>`
-    : `<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" fill="#ffb84d"/><g stroke="#ffb84d" stroke-width="1.8" stroke-linecap="round"><path d="M12 2v2.5M12 19.5V22M22 12h-2.5M4.5 12H2M18.5 5.5L16.8 7.2M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2L5.5 5.5"/></g></svg>`;
-  if (typeof lastRainData !== "undefined" && lastRainData) refreshChartsForTheme();
+  try{
+    document.body.classList.toggle('night', isNight);
+    document.getElementById('daynight-switch').classList.toggle('is-night', isNight);
+    document.getElementById('dn-thumb').innerHTML = isNight
+      ? `<svg viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z" fill="#5b6f8c"/></svg>`
+      : `<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" fill="#ffb84d"/><g stroke="#ffb84d" stroke-width="1.8" stroke-linecap="round"><path d="M12 2v2.5M12 19.5V22M22 12h-2.5M4.5 12H2M18.5 5.5L16.8 7.2M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2L5.5 5.5"/></g></svg>`;
+    refreshChartsForTheme();
+  }catch(e){
+    console.error('applyNight:', e);
+  }
 }
 function updateDayNightAuto(){
-  if(manualOverride) return;
-  const hour = new Date().getHours();
-  applyNight(hour >= 19 || hour < 7);
+  try{
+    if(manualOverride) return;
+    const hour = new Date().getHours();
+    applyNight(hour >= 19 || hour < 7);
+  }catch(e){
+    console.error('updateDayNightAuto:', e);
+  }
 }
-document.getElementById('daynight-switch').addEventListener('click', () => {
-  manualOverride = true;
-  applyNight(!document.body.classList.contains('night'));
-});
 
 function updateMood(meanMm, maxMm){
   document.body.classList.remove('mood-rain','mood-sun','mood-storm');
@@ -629,48 +671,18 @@ function updateMood(meanMm, maxMm){
   else document.body.classList.add('mood-sun');
 }
 
-initBackground();
-updateDayNightAuto();
-setInterval(updateDayNightAuto, 5*60*1000);
-
 /* ============================================================
    TABS
    ============================================================ */
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => showTab(btn.dataset.tab));
-});
 function showTab(name){
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
 }
-document.querySelectorAll('.sub-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    if(lastGeneralData) renderPronostico(lastGeneralData, parseInt(btn.dataset.range,10));
-  });
-});
 
 /* ============================================================
-   DATOS — MODELOS DE LLUVIA (sin cambios respecto al comparador original)
+   UBICACIÓN — geolocalización y búsqueda de ciudad
+   (MODELS, con los modelos de lluvia, vive en VARIABLES GLOBALES)
    ============================================================ */
-const MODELS = [
-  { id: 'ecmwf_ifs025', label: 'ECMWF', hex:'#2f8fe0' },
-  { id: 'gfs_seamless', label: 'GFS', hex:'#2fc98f' },
-  { id: 'icon_seamless', label: 'ICON', hex:'#ffb648' },
-  { id: 'gem_seamless', label: 'GEM', hex:'#a578e8' },
-  { id: 'ukmo_seamless', label: 'UKMO', hex:'#ff7a7a' },
-  { id: 'meteofrance_seamless', label: 'Météo-France', hex:'#28d6c8' },
-];
-
-let current = { lat: -28.4835296, lon: -71.2492527, name: 'Huasco, Atacama, Chile' };
-let hourlyChart = null, horasChart = null;
-let lastRainData = null, lastGeneralData = null, lastRangeDays = 7;
-
-document.getElementById('loc-name').textContent = current.name;
-loadAllWeather();
-
-document.getElementById('use-loc-btn').addEventListener('click', () => useMyLocation(false));
 
 async function reverseGeocode(lat, lon){
   try{
@@ -683,44 +695,97 @@ async function reverseGeocode(lat, lon){
   }
 }
 
-function useMyLocation(isAutoAttempt){
-  if(!('geolocation' in navigator)){
-    if(!isAutoAttempt) alert('Tu navegador no permite obtener la ubicación.');
-    return;
-  }
-  const locNameEl = document.getElementById('loc-name');
-  const prevText = locNameEl.textContent;
-  if(!isAutoAttempt) locNameEl.textContent = 'Obteniendo ubicación...';
+function useMyLocation(isAutoAttempt, onDone){
+  const done = () => { if(typeof onDone === 'function') onDone(); };
+  try{
+    if(!('geolocation' in navigator)){
+      if(!isAutoAttempt) alert('Tu navegador no permite obtener la ubicación.');
+      done();
+      return;
+    }
+    const locNameEl = document.getElementById('loc-name');
+    const prevText = locNameEl.textContent;
+    if(!isAutoAttempt) locNameEl.textContent = 'Obteniendo ubicación...';
 
-  navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      const { latitude, longitude } = pos.coords;
-      locNameEl.textContent = 'Obteniendo ubicación...';
-      const name = await reverseGeocode(latitude, longitude);
-      current = { lat: latitude, lon: longitude, name };
-      locNameEl.textContent = name;
-      loadAllWeather();
-    },
-    (err) => {
-      // Si el usuario deniega el permiso o falla el GPS, se mantiene la ubicación anterior
-      // y se abre el buscador de ciudad para que pueda elegirla a mano.
-      locNameEl.textContent = prevText;
-      let msg = 'No se pudo obtener tu ubicación.';
-      if(err.code === err.PERMISSION_DENIED) msg = 'Permiso de ubicación denegado. Busca tu ciudad abajo, o actívalo en los ajustes del navegador/celular.';
-      const resultsEl = document.getElementById('search-results');
-      resultsEl.innerHTML = `<div class="search-result" style="cursor:default;">${msg}</div>`;
-      document.getElementById('search-box').classList.add('active');
-      document.getElementById('search-input').focus();
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 5 * 60 * 1000 }
-  );
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try{
+          const { latitude, longitude } = pos.coords;
+          locNameEl.textContent = 'Obteniendo ubicación...';
+          const name = await reverseGeocode(latitude, longitude);
+          current = { lat: latitude, lon: longitude, name };
+          locNameEl.textContent = name;
+          // En el intento automático de arranque, initApp() se encarga de
+          // cargar los datos una sola vez con la ubicación ya resuelta.
+          if(!isAutoAttempt) loadAllWeather();
+        }catch(e){
+          console.error('useMyLocation (éxito):', e);
+        }finally{
+          done();
+        }
+      },
+      (err) => {
+        // Si el usuario deniega el permiso o falla el GPS, se mantiene la ubicación anterior
+        // (Huasco por defecto en el arranque automático) sin romper la aplicación.
+        locNameEl.textContent = prevText;
+        if(!isAutoAttempt){
+          // Solo se interrumpe al usuario con el buscador cuando el intento fue manual
+          // (botón "MI UBICACIÓN"); el intento automático de arranque falla en silencio.
+          let msg = 'No se pudo obtener tu ubicación.';
+          if(err.code === err.PERMISSION_DENIED) msg = 'Permiso de ubicación denegado. Busca tu ciudad abajo, o actívalo en los ajustes del navegador/celular.';
+          const resultsEl = document.getElementById('search-results');
+          resultsEl.innerHTML = `<div class="search-result" style="cursor:default;">${msg}</div>`;
+          document.getElementById('search-box').classList.add('active');
+          document.getElementById('search-input').focus();
+        }
+        done();
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 5 * 60 * 1000 }
+    );
+  }catch(e){
+    console.error('useMyLocation:', e);
+    done();
+  }
 }
 
-document.getElementById('change-loc-btn').addEventListener('click', () => {
-  document.getElementById('search-box').classList.toggle('active');
-});
-document.getElementById('search-btn').addEventListener('click', doSearch);
-document.getElementById('search-input').addEventListener('keydown', e => { if(e.key === 'Enter') doSearch(); });
+/* ============================================================
+   GEOLOCALIZACIÓN AUTOMÁTICA AL INICIAR
+   - permiso "granted" -> se usa automáticamente, sin diálogo.
+   - permiso "prompt"  -> se dispara el diálogo nativo del navegador.
+   - permiso "denied"  -> no se pregunta; se mantiene Huasco por defecto.
+   Nunca lanza excepciones ni bloquea el arranque de la app.
+   ============================================================ */
+function attemptAutoGeolocation(){
+  return new Promise((resolve) => {
+    try{
+      if(!('geolocation' in navigator)){
+        resolve();
+        return;
+      }
+      if(navigator.permissions && navigator.permissions.query){
+        navigator.permissions.query({ name: 'geolocation' })
+          .then((status) => {
+            if(status.state === 'denied'){
+              resolve();
+              return;
+            }
+            // 'granted' o 'prompt': se intenta obtener la ubicación.
+            useMyLocation(true, resolve);
+          })
+          .catch(() => {
+            // Si la Permissions API falla, se intenta igual: getCurrentPosition
+            // mostrará el diálogo nativo si el permiso aún no está decidido.
+            useMyLocation(true, resolve);
+          });
+      } else {
+        useMyLocation(true, resolve);
+      }
+    }catch(e){
+      console.error('attemptAutoGeolocation:', e);
+      resolve();
+    }
+  });
+}
 
 async function doSearch(){
   const q = document.getElementById('search-input').value.trim();
@@ -756,7 +821,7 @@ async function doSearch(){
 }
 
 function loadAllWeather(){
-  Promise.all([loadGeneral(), loadRain()]);
+  return Promise.all([loadGeneral(), loadRain()]);
 }
 
 async function loadRain(){
@@ -797,8 +862,18 @@ async function loadGeneral(){
 }
 
 function refreshChartsForTheme(){
-  if(lastRainData) renderHourlyRain(lastRainData);
-  if(lastGeneralData) renderHorasChart(lastGeneralData);
+  try{
+    if(!lastRainData) return;
+    renderHourlyRain(lastRainData);
+  }catch(e){
+    console.error('refreshChartsForTheme (lluvia):', e);
+  }
+  try{
+    if(!lastGeneralData) return;
+    renderHorasChart(lastGeneralData);
+  }catch(e){
+    console.error('refreshChartsForTheme (horas):', e);
+  }
 }
 
 /* ============================================================
@@ -1311,11 +1386,102 @@ function renderTable(data){
   });
   tbody += '</tbody>';
   table.innerHTML = thead + tbody;
-}if('serviceWorker' in navigator){
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(err => console.error('SW error:', err));
-  });
 }
+
+/* ============================================================
+   REGISTRO DE EVENTOS
+   Todos los addEventListener de la app se registran acá, y esta
+   función solo se llama desde initApp(), cuando el DOM ya existe.
+   ============================================================ */
+function registerEventListeners(){
+  try{
+    document.getElementById('daynight-switch').addEventListener('click', () => {
+      manualOverride = true;
+      applyNight(!document.body.classList.contains('night'));
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => showTab(btn.dataset.tab));
+    });
+
+    document.querySelectorAll('.sub-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if(lastGeneralData) renderPronostico(lastGeneralData, parseInt(btn.dataset.range,10));
+      });
+    });
+
+    document.getElementById('use-loc-btn').addEventListener('click', () => useMyLocation(false));
+    document.getElementById('change-loc-btn').addEventListener('click', () => {
+      document.getElementById('search-box').classList.toggle('active');
+    });
+    document.getElementById('search-btn').addEventListener('click', doSearch);
+    document.getElementById('search-input').addEventListener('keydown', e => { if(e.key === 'Enter') doSearch(); });
+  }catch(e){
+    console.error('registerEventListeners:', e);
+  }
+}
+
+/* ============================================================
+   SERVICE WORKER
+   ============================================================ */
+function registerServiceWorker(){
+  try{
+    if('serviceWorker' in navigator){
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => console.error('SW error:', err));
+      });
+    }
+  }catch(e){
+    console.error('registerServiceWorker:', e);
+  }
+}
+
+/* ============================================================
+   INICIALIZACIÓN DE LA APP
+   Único punto de entrada. Orden garantizado:
+   1. variables globales (ya declaradas arriba del script)
+   2. fondo animado
+   3. tema día/noche inicial
+   4. eventos de la interfaz
+   5. geolocalización (según el permiso del navegador)
+   6. carga de datos
+   7. gráficos (se crean dentro de la carga de datos)
+   8. actualización visual periódica
+   ============================================================ */
+async function initApp(){
+  try{
+    // 2. Fondo animado
+    initBackground();
+
+    // 3. Tema día/noche inicial (según la hora local). refreshChartsForTheme()
+    //    es seguro incluso sin datos ni gráficos todavía.
+    updateDayNightAuto();
+
+    // 4. Eventos de la interfaz
+    renderTabIcons();
+    registerEventListeners();
+
+    // 5. Geolocalización: usa el permiso si ya está concedido, muestra el
+    //    diálogo si está en "prompt", y si fue denegado mantiene Huasco.
+    const locNameEl = document.getElementById('loc-name');
+    if(locNameEl) locNameEl.textContent = current.name;
+    await attemptAutoGeolocation();
+
+    // 6 y 7. Carga de datos y creación de los gráficos
+    await loadAllWeather();
+
+    // 8. Actualización visual periódica del tema día/noche
+    setInterval(updateDayNightAuto, 5 * 60 * 1000);
+
+    registerServiceWorker();
+  }catch(e){
+    console.error('initApp:', e);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', initApp);
 </script>
 </body>
 </html>
