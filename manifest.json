@@ -1,0 +1,15 @@
+{
+  "name": "Aero Clima — Pronóstico Completo",
+  "short_name": "Aero Clima",
+  "description": "Pronóstico del clima y comparador de modelos de lluvia",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#c3ecff",
+  "theme_color": "#3aa0e8",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
