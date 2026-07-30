@@ -1,9 +1,9 @@
 // Cambiar la versión fuerza a que instalaciones existentes reciban el gestor
 // de fondos corregido en vez de conservar el JavaScript anterior en caché.
-const CACHE_NAME = 'aero-clima-v7';
+const CACHE_NAME = 'aero-clima-v11-spatial-complete';
 const APP_SHELL = [
   './index.html', './manifest.json', './icon-192.png', './icon-512.png', './config.js',
-  './js/background-manager.js',
+  './js/background-manager.js', './css/spatial-complete.css?v=11',
   './assets/backgrounds/light/beach.webp', './assets/backgrounds/light/mountain.webp', './assets/backgrounds/light/city.webp', './assets/backgrounds/light/desert.webp',
   './assets/backgrounds/light/forest.webp', './assets/backgrounds/light/lake.webp', './assets/backgrounds/light/rural.webp', './assets/backgrounds/light/rocky-coast.webp',
   './assets/backgrounds/dark/beach.webp', './assets/backgrounds/dark/mountain.webp', './assets/backgrounds/dark/city.webp', './assets/backgrounds/dark/desert.webp',

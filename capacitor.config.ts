@@ -6,13 +6,13 @@ const config: CapacitorConfig = {
   webDir: 'www',
   android: {
     allowMixedContent: false,
-    backgroundColor: '#11110f'
+    backgroundColor: '#0b0d12'
   },
   plugins: {
     SplashScreen: {
       launchShowDuration: 0,
       launchAutoHide: true,
-      backgroundColor: '#11110f',
+      backgroundColor: '#0b0d12',
       androidScaleType: 'CENTER_CROP',
       showSpinner: false
     },

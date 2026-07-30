@@ -4,7 +4,9 @@
   "private": true,
   "description": "AeroClima PWA empaquetada como aplicación Android con Capacitor.",
   "scripts": {
+    "test": "node tests/background-manager.test.js && node tests/ui-spatial.test.js",
     "test:backgrounds": "node tests/background-manager.test.js",
+    "test:ui": "node tests/ui-spatial.test.js",
     "web:prepare": "node scripts/prepare-web.mjs",
     "android:sync": "npm run web:prepare && npx cap sync android",
     "android:open": "npm run android:sync && npx cap open android",

@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<meta name="theme-color" content="#3aa0e8">
+<meta name="theme-color" content="#0b0d12">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Aero Clima">
@@ -411,11 +411,203 @@ body,body.night{background:var(--background-dark);color:var(--text-primary)}
 /* AeroClima V2 local-theme layer */
 body:not(.night){--background-dark:#efece6;--glass-dark:rgba(255,255,255,.48);--glass-dark-strong:rgba(255,255,255,.65);--text-primary:#1d1d1b;--text-secondary:rgba(29,29,27,.62);--border-glass:rgba(255,255,255,.5);--ink:var(--text-primary);--ink-soft:var(--text-secondary);--ink-faint:rgba(29,29,27,.48);--glass:var(--glass-dark);--glass-strong:var(--glass-dark-strong);--glass-border:var(--border-glass);--glass-shadow:rgba(46,41,35,.18);--accent:#e7782e;background:var(--background-dark);color:var(--text-primary)}
 body:not(.night) .app-background__overlay{background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(247,244,238,.48) 58%,rgba(239,236,230,.78))}body:not(.night) .glass,body:not(.night) .model-chip,body:not(.night) .hour-item,body:not(.night) .day-card{background:var(--glass-dark-strong);border-color:rgba(255,255,255,.66);box-shadow:0 16px 38px -25px rgba(42,35,27,.3),inset 0 1px 0 rgba(255,255,255,.85)}body:not(.night) .tabbar{background:rgba(255,255,255,.64);border-color:rgba(255,255,255,.68)}body:not(.night) .tab-btn{color:rgba(29,29,27,.58)}body:not(.night) .tab-btn.active,body:not(.night) .sub-btn.active{color:#fff}body:not(.night) .tab-btn.active svg{color:#fff}body:not(.night) .aero-btn,body:not(.night) .dn-switch{background:rgba(255,255,255,.64);color:var(--text-primary);border-color:rgba(255,255,255,.72)}body:not(.night) .background-attribution,body:not(.night) .foot-note{color:rgba(29,29,27,.55);text-shadow:none}.app-background__image{filter:blur(48px) saturate(.72) brightness(.82);transform:scale(1.13)}body:not(.night) .app-background__image{filter:blur(48px) saturate(.68) brightness(1.08)}.background-preview{height:86px;border-radius:20px;background-size:cover;background-position:center;filter:blur(.2px) saturate(.82);box-shadow:inset 0 0 0 1px rgba(255,255,255,.24);margin:-2px 0 8px}.background-preview.is-dark{filter:blur(.2px) brightness(.68) saturate(.72)}
+
+/* ============================================================
+   ETAPA 1 - AURA AMBIENT GLOW + SPATIAL GLASS
+   Tokens exportables equivalentes a la especificacion AuraLayout.
+   ============================================================ */
+:root{
+  --aura-viewport:#0b0d12;
+  --aura-orange:#ff6b00;
+  --aura-violet:#8b5cf6;
+  --aura-indigo:#6366f1;
+  --aura-cyan:#06b6d4;
+  --aura-blue:#3b82f6;
+  --spatial-glass:rgba(255,255,255,.04);
+  --spatial-glass-strong:rgba(255,255,255,.065);
+  --spatial-border:rgba(255,255,255,.10);
+  --spatial-text:#f1f5f9;
+  --spatial-text-muted:rgba(226,232,240,.66);
+}
+html{background:var(--aura-viewport)}
+body,
+body.night,
+body:not(.night){
+  min-height:100vh;
+  width:100%;
+  margin:0;
+  padding:0;
+  overflow-x:hidden;
+  background:var(--aura-viewport);
+  color:var(--spatial-text);
+  --background-dark:var(--aura-viewport);
+  --glass-dark:var(--spatial-glass);
+  --glass-dark-strong:var(--spatial-glass-strong);
+  --text-primary:var(--spatial-text);
+  --text-secondary:var(--spatial-text-muted);
+  --border-glass:var(--spatial-border);
+  --glass:var(--spatial-glass);
+  --glass-strong:var(--spatial-glass-strong);
+  --glass-border:var(--spatial-border);
+  --glass-shadow:rgba(0,0,0,.42);
+  --ink:var(--spatial-text);
+  --ink-soft:var(--spatial-text-muted);
+  --ink-faint:rgba(226,232,240,.5);
+}
+.app-background{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  overflow:hidden;
+  pointer-events:none;
+  background:var(--aura-viewport);
+}
+.app-background__image,
+.app-background__overlay{opacity:0!important}
+.app-background__noise{
+  z-index:4;
+  opacity:.035;
+  mix-blend-mode:soft-light;
+}
+.aura-canvas{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  z-index:1;
+}
+.aura-orb{
+  position:absolute;
+  display:block;
+  border-radius:50%;
+  will-change:transform;
+  transform:translate3d(0,0,0);
+  backface-visibility:hidden;
+}
+.aura-orb--sun{
+  top:-80px;
+  left:-80px;
+  width:350px;
+  height:350px;
+  opacity:.30;
+  filter:blur(100px);
+  background:linear-gradient(135deg,var(--aura-orange),#ff8800);
+  animation:auraFloatSun 18s ease-in-out infinite alternate;
+}
+.aura-orb--atmosphere{
+  top:33.333%;
+  right:-80px;
+  width:400px;
+  height:400px;
+  opacity:.25;
+  filter:blur(120px);
+  background:linear-gradient(135deg,var(--aura-violet),var(--aura-indigo));
+  animation:auraFloatAtmosphere 22s ease-in-out infinite alternate;
+}
+.aura-orb--precipitation{
+  bottom:-120px;
+  left:25%;
+  width:450px;
+  height:450px;
+  opacity:.20;
+  filter:blur(130px);
+  background:linear-gradient(45deg,var(--aura-cyan),var(--aura-blue));
+  animation:auraFloatPrecipitation 24s ease-in-out infinite alternate;
+}
+@keyframes auraFloatSun{
+  to{transform:translate3d(30px,24px,0) scale(1.06)}
+}
+@keyframes auraFloatAtmosphere{
+  to{transform:translate3d(-28px,-20px,0) scale(.96)}
+}
+@keyframes auraFloatPrecipitation{
+  to{transform:translate3d(18px,-32px,0) scale(1.05)}
+}
+#bg-fx{z-index:1}
+.wrap{
+  position:relative;
+  z-index:10;
+  width:100%;
+  max-width:448px;
+  margin:0 auto;
+  padding:max(24px,env(safe-area-inset-top)) 16px calc(116px + env(safe-area-inset-bottom));
+}
+.glass,
+body.night .glass,
+body:not(.night) .glass{
+  background:var(--spatial-glass);
+  border:1px solid var(--spatial-border);
+  box-shadow:0 20px 50px -28px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.07);
+  backdrop-filter:blur(40px) saturate(180%);
+  -webkit-backdrop-filter:blur(40px) saturate(180%);
+}
+.glass::before{opacity:.12}
+.model-chip,
+.hour-item,
+.day-card,
+body.night .model-chip,
+body.night .hour-item,
+body.night .day-card,
+body:not(.night) .model-chip,
+body:not(.night) .hour-item,
+body:not(.night) .day-card{
+  background:var(--spatial-glass-strong);
+  border-color:var(--spatial-border);
+  color:var(--spatial-text);
+  backdrop-filter:blur(28px) saturate(180%);
+  -webkit-backdrop-filter:blur(28px) saturate(180%);
+}
+.tabbar,
+body.night .tabbar,
+body:not(.night) .tabbar{
+  background:rgba(11,13,18,.64);
+  border-color:var(--spatial-border);
+  backdrop-filter:blur(40px) saturate(180%);
+  -webkit-backdrop-filter:blur(40px) saturate(180%);
+}
+.aero-btn,
+.dn-switch,
+body.night .aero-btn,
+body.night .dn-switch,
+body:not(.night) .aero-btn,
+body:not(.night) .dn-switch{
+  background:rgba(255,255,255,.06);
+  border-color:var(--spatial-border);
+  color:var(--spatial-text);
+}
+h1,.hero-number,.model-val,.day-name,.day-tmax,.gauge-pct,.tband-val,
+body:not(.night) h1,body:not(.night) .hero-number,body:not(.night) .model-val,
+body:not(.night) .day-name,body:not(.night) .day-tmax,body:not(.night) .gauge-pct{
+  color:var(--spatial-text);
+}
+.card-title,.model-name,.hero-sub,.loc-name,.loc-label,.day-name small,.day-tmin,.hour-time,.gauge-lbl,
+body:not(.night) .card-title,body:not(.night) .model-name,body:not(.night) .hero-sub,
+body:not(.night) .loc-name,body:not(.night) .day-name small,body:not(.night) .day-tmin{
+  color:var(--spatial-text-muted);
+}
+.background-attribution{display:none!important}
+@media (prefers-reduced-motion:reduce){
+  .aura-orb{animation:none!important}
+}
+@media (min-width:720px){
+  body{padding:0}
+  .wrap{max-width:448px;padding:32px 16px 48px}
+  .tab-panel.active,
+  .tab-panel.active>#app{display:block}
+  .tab-panel.active>.card,
+  .tab-panel.active>#app>.card{margin-bottom:14px}
+  .tabbar{position:sticky;top:16px}
+}
 </style>
+<link rel="stylesheet" href="css/spatial-complete.css?v=11">
 </head>
 <body>
 
 <div class="app-background" aria-hidden="true">
+  <div class="aura-canvas">
+    <span class="aura-orb aura-orb--sun"></span>
+    <span class="aura-orb aura-orb--atmosphere"></span>
+    <span class="aura-orb aura-orb--precipitation"></span>
+  </div>
   <div class="app-background__image is-visible"></div>
   <div class="app-background__image"></div>
   <div class="app-background__overlay"></div>
@@ -965,7 +1157,7 @@ function renderHoy(data){
   const timeLabel = now.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit' });
 
   document.getElementById('tab-hoy').innerHTML = `
-    <div class="glass card">
+    <div class="glass card hero-card--weather">
       <div class="card-title">Ahora · ${current.name}</div>
       <div class="hero">
         <div class="hero-left">
@@ -980,23 +1172,25 @@ function renderHoy(data){
           </div>
         </div>
         <div class="hero-right">
-          <div class="agreement-badge">
-            <div style="font-size:11px;color:var(--ink-faint); text-transform:uppercase; letter-spacing:.06em; font-weight:700;">Máx / Mín hoy</div>
-            <div style="font-weight:700; font-size:22px; margin-top:4px;" class="mono">${Math.round(tmax)}° / ${Math.round(tmin)}°</div>
+          <div class="daily-range">
+            <div class="daily-range-label">Máx / Mín hoy</div>
+            <div class="daily-range-values">${Math.round(tmax)}° / ${Math.round(tmin)}°</div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="glass card">
+    <div class="glass card conditions-card">
       <div class="card-title">${ICONS.models}Condiciones actuales</div>
-      <div class="models-grid">
-        <div class="model-chip"><div class="model-name">Humedad</div><div class="model-val">${humidity!=null ? humidity+'%' : '—'}</div></div>
-        <div class="model-chip"><div class="model-name">Viento</div><div class="model-val">${Math.round(cw.windspeed)} km/h</div></div>
-        <div class="model-chip"><div class="model-name">Sensación térmica</div><div class="model-val">${Math.round(apparent)}°</div></div>
-        <div class="model-chip"><div class="model-name">Precipitación hoy</div><div class="model-val">${precipToday.toFixed(1)} mm</div></div>
-        <div class="model-chip"><div class="model-name">${ICONS.sunrise}<span style="margin-left:4px;">Amanecer</span></div><div class="model-val">${formatTime(sunrise)}</div></div>
-        <div class="model-chip"><div class="model-name">${ICONS.sunset}<span style="margin-left:4px;">Atardecer</span></div><div class="model-val">${formatTime(sunset)}</div></div>
+      <div class="models-grid conditions-grid">
+        <div class="model-chip condition-chip"><div class="model-name">Humedad</div><div class="model-val">${humidity!=null ? humidity+'%' : '—'}</div></div>
+        <div class="model-chip condition-chip"><div class="model-name">Viento</div><div class="model-val">${Math.round(cw.windspeed)} km/h</div></div>
+        <div class="model-chip condition-chip condition-chip--feels"><div class="model-name">Sensación térmica</div><div class="model-val">${Math.round(apparent)}°</div></div>
+        <div class="model-chip condition-chip condition-chip--rain"><div class="model-name">Precipitación hoy</div><div class="model-val">${precipToday.toFixed(1)} mm</div></div>
+        <div class="sun-cycle-grid">
+          <div class="model-chip condition-chip condition-chip--sun"><div class="model-name">${ICONS.sunrise}<span style="margin-left:4px;">Amanecer</span></div><div class="model-val">${formatTime(sunrise)}</div></div>
+          <div class="model-chip condition-chip condition-chip--sun"><div class="model-name">${ICONS.sunset}<span style="margin-left:4px;">Atardecer</span></div><div class="model-val">${formatTime(sunset)}</div></div>
+        </div>
       </div>
     </div>
 
@@ -1077,26 +1271,39 @@ function renderHorasChart(data){
     const d = new Date(t);
     return d.toLocaleDateString('es-CL', {weekday:'short'}) + ' ' + d.getHours() + 'h';
   });
-  const isNight = document.body.classList.contains('night');
-  const gridColor = isNight ? 'rgba(255,255,255,.08)' : 'rgba(63,124,153,.12)';
-  const tickColor = isNight ? '#7fa4b8' : '#436779';
+  const gridColor = 'rgba(255,255,255,.07)';
+  const tickColor = 'rgba(255,255,255,.40)';
   const tempGrad = ctx.createLinearGradient(0,0,0,280);
-  tempGrad.addColorStop(0, '#ff7a7a55'); tempGrad.addColorStop(1, '#ff7a7a00');
+  tempGrad.addColorStop(0, 'rgba(255,122,0,.25)'); tempGrad.addColorStop(1, 'rgba(255,122,0,0)');
+  const neonGlowPlugin = {
+    id:'aeroTemperatureGlow',
+    beforeDatasetDraw(chart,args){
+      if(args.meta.type !== 'line') return;
+      chart.ctx.save();
+      chart.ctx.shadowColor='rgba(255,122,0,.80)';
+      chart.ctx.shadowBlur=8;
+    },
+    afterDatasetDraw(chart,args){
+      if(args.meta.type === 'line') chart.ctx.restore();
+    }
+  };
 
   if(horasChart) horasChart.destroy();
   horasChart = new Chart(ctx, {
+    plugins:[neonGlowPlugin],
     data: {
       labels,
       datasets: [
         {
           type:'line', label:'Temperatura (°C)', data: data.hourly.temperature_2m.slice(0,48),
-          borderColor:'#ff7a7a', backgroundColor:tempGrad, borderWidth:2.4, pointRadius:0,
-          pointHoverRadius:5, pointHoverBackgroundColor:'#fff', pointHoverBorderColor:'#ff7a7a', pointHoverBorderWidth:2,
+          borderColor:'#FF7A00', backgroundColor:tempGrad, borderWidth:3, pointRadius:0,
+          pointHoverRadius:5, pointHoverBackgroundColor:'#fff', pointHoverBorderColor:'#FF7A00', pointHoverBorderWidth:2,
           fill:true, tension:.4, yAxisID:'y'
         },
         {
           type:'bar', label:'Prob. lluvia (%)', data: data.hourly.precipitation_probability.slice(0,48),
-          backgroundColor:'rgba(58,160,232,.35)', borderRadius:4, borderSkipped:false, yAxisID:'y1', barPercentage:.6
+          backgroundColor:'rgba(6,182,212,.40)', borderColor:'#06B6D4', borderWidth:1,
+          borderRadius:4, borderSkipped:false, yAxisID:'y1', barPercentage:.6
         }
       ]
     },
@@ -1105,9 +1312,9 @@ function renderHorasChart(data){
       plugins:{
         legend:{ labels:{ color:tickColor, font:{family:"'Inter'", size:11, weight:'600'}, usePointStyle:true, boxWidth:7, padding:14 } },
         tooltip:{
-          backgroundColor: isNight ? 'rgba(24,52,78,.9)' : 'rgba(255,255,255,.92)',
-          borderColor:'rgba(58,160,232,.35)', borderWidth:1,
-          titleColor: isNight ? '#eaf4fb' : '#1d3b4c', bodyColor: isNight ? '#bcd7e6' : '#436779',
+          backgroundColor:'rgba(11,13,18,.94)',
+          borderColor:'rgba(255,255,255,.12)', borderWidth:1,
+          titleColor:'#fff', bodyColor:'rgba(255,255,255,.68)',
           padding:10, cornerRadius:10, titleFont:{family:"'Inter'", weight:'700'}, bodyFont:{family:"'JetBrains Mono'"}
         }
       },
@@ -1210,10 +1417,10 @@ function renderAlertas(data){
   if(alerts.length === 0){
     container.innerHTML = `
       <div class="glass card">
-        <div class="alert-empty">
-          ${ICONS.check}
-          <div style="font-weight:700; font-size:15px; color:var(--ink);">Sin alertas activas</div>
-          <div style="font-size:13px; margin-top:4px;">El pronóstico de los próximos días se ve tranquilo.</div>
+        <div class="alert-empty alert-empty--clear">
+          <div class="alert-empty-icon">${ICONS.check}</div>
+          <div class="alert-empty-title">Sin alertas activas</div>
+          <div class="alert-empty-subtitle">El pronóstico de los próximos días se ve tranquilo.</div>
         </div>
       </div>`;
     return;
@@ -1279,7 +1486,7 @@ function renderHero(data){
   const max = Math.max(...todayVals);
   const spread = max - min;
 
-  let tag = 'tag-alta', tagText = 'ALTA CONCORDANCIA', note = 'Los modelos coinciden: pronóstico confiable.', gA='#2fc98f', gB='#28d6c8', pct = Math.max(10, 100 - spread*7);
+  let tag = 'tag-alta', tagText = 'ALTA CONCORDANCIA', note = 'Los modelos coinciden: pronóstico confiable.', gA='#34D399', gB='#34D399', pct = Math.max(10, 100 - spread*7);
   if(spread > 8){
     tag = 'tag-baja'; tagText = 'BAJA CONCORDANCIA'; note = 'Los modelos difieren bastante — revisa de nuevo mañana.'; gA='#ff7a7a'; gB='#ffb648';
   } else if(spread > 3){
@@ -1403,22 +1610,32 @@ function renderHourlyRain(data){
     };
   }).filter(Boolean);
 
-  const isNight = document.body.classList.contains('night');
-  const gridColor = isNight ? 'rgba(255,255,255,.08)' : 'rgba(63,124,153,.12)';
-  const tickColor = isNight ? '#7fa4b8' : '#436779';
+  const gridColor = 'rgba(255,255,255,.07)';
+  const tickColor = 'rgba(255,255,255,.40)';
+  const modelGlowPlugin = {
+    id:'aeroModelGlow',
+    beforeDatasetDraw(chart,args){
+      const dataset=chart.data.datasets[args.index];
+      chart.ctx.save();
+      chart.ctx.shadowColor=dataset.borderColor;
+      chart.ctx.shadowBlur=7;
+    },
+    afterDatasetDraw(chart){ chart.ctx.restore(); }
+  };
 
   if(hourlyChart) hourlyChart.destroy();
   hourlyChart = new Chart(ctx, {
     type: 'line',
+    plugins:[modelGlowPlugin],
     data: { labels, datasets },
     options: {
       responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { labels: { color: tickColor, font: { family: "'Inter'", size: 11, weight:'600' }, usePointStyle: true, boxWidth: 7, padding:14 } },
         tooltip: {
-          backgroundColor: isNight ? 'rgba(24,52,78,.9)' : 'rgba(255,255,255,.92)',
-          borderColor: 'rgba(58,160,232,.35)', borderWidth: 1,
-          titleColor: isNight ? '#eaf4fb' : '#1d3b4c', bodyColor: isNight ? '#bcd7e6' : '#436779',
+          backgroundColor:'rgba(11,13,18,.94)',
+          borderColor:'rgba(255,255,255,.12)', borderWidth:1,
+          titleColor:'#fff', bodyColor:'rgba(255,255,255,.68)',
           padding: 10, cornerRadius: 10, titleFont:{family:"'Inter'", weight:'700'}, bodyFont:{family:"'JetBrains Mono'"}
         }
       },
