@@ -22,8 +22,12 @@ assert.match(css, /linear-gradient\(90deg,#f97316,#f59e0b\)/);
 assert.match(css, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 assert.match(css, /rgba\(16,185,129,.05\)/);
 
-assert.match(serviceWorker, /aero-clima-v11-spatial-complete/);
-assert.match(serviceWorker, /\.\/css\/spatial-complete\.css\?v=11/);
+assert.match(serviceWorker, /aero-clima-v13-luminous-glass/);
+assert.match(serviceWorker, /\.\/css\/spatial-complete\.css\?v=13/);
+assert.match(css, /background:rgba\(255,255,255,.40\)!important/);
+assert.match(css, /background:rgba\(255,255,255,.04\)!important/);
+assert.match(css, /background:#ff5500/);
+assert.match(css, /background:#9000ff/);
 JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
 
 console.log('Spatial UI structure and inline JavaScript test passed.');

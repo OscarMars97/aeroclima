@@ -598,7 +598,7 @@ body:not(.night) .loc-name,body:not(.night) .day-name small,body:not(.night) .da
   .tabbar{position:sticky;top:16px}
 }
 </style>
-<link rel="stylesheet" href="css/spatial-complete.css?v=11">
+<link rel="stylesheet" href="css/spatial-complete.css?v=13">
 </head>
 <body>
 
@@ -1271,8 +1271,9 @@ function renderHorasChart(data){
     const d = new Date(t);
     return d.toLocaleDateString('es-CL', {weekday:'short'}) + ' ' + d.getHours() + 'h';
   });
-  const gridColor = 'rgba(255,255,255,.07)';
-  const tickColor = 'rgba(255,255,255,.40)';
+  const isNight = document.body.classList.contains('night');
+  const gridColor = isNight ? 'rgba(255,255,255,.07)' : 'rgba(39,39,42,.10)';
+  const tickColor = isNight ? 'rgba(255,255,255,.40)' : 'rgba(39,39,42,.52)';
   const tempGrad = ctx.createLinearGradient(0,0,0,280);
   tempGrad.addColorStop(0, 'rgba(255,122,0,.25)'); tempGrad.addColorStop(1, 'rgba(255,122,0,0)');
   const neonGlowPlugin = {
@@ -1312,9 +1313,9 @@ function renderHorasChart(data){
       plugins:{
         legend:{ labels:{ color:tickColor, font:{family:"'Inter'", size:11, weight:'600'}, usePointStyle:true, boxWidth:7, padding:14 } },
         tooltip:{
-          backgroundColor:'rgba(11,13,18,.94)',
-          borderColor:'rgba(255,255,255,.12)', borderWidth:1,
-          titleColor:'#fff', bodyColor:'rgba(255,255,255,.68)',
+          backgroundColor:isNight ? 'rgba(10,10,12,.94)' : 'rgba(255,255,255,.94)',
+          borderColor:isNight ? 'rgba(255,255,255,.12)' : 'rgba(39,39,42,.12)', borderWidth:1,
+          titleColor:isNight ? '#fff' : '#18181b', bodyColor:isNight ? 'rgba(255,255,255,.68)' : 'rgba(39,39,42,.68)',
           padding:10, cornerRadius:10, titleFont:{family:"'Inter'", weight:'700'}, bodyFont:{family:"'JetBrains Mono'"}
         }
       },
@@ -1610,8 +1611,9 @@ function renderHourlyRain(data){
     };
   }).filter(Boolean);
 
-  const gridColor = 'rgba(255,255,255,.07)';
-  const tickColor = 'rgba(255,255,255,.40)';
+  const isNight = document.body.classList.contains('night');
+  const gridColor = isNight ? 'rgba(255,255,255,.07)' : 'rgba(39,39,42,.10)';
+  const tickColor = isNight ? 'rgba(255,255,255,.40)' : 'rgba(39,39,42,.52)';
   const modelGlowPlugin = {
     id:'aeroModelGlow',
     beforeDatasetDraw(chart,args){
@@ -1633,9 +1635,9 @@ function renderHourlyRain(data){
       plugins: {
         legend: { labels: { color: tickColor, font: { family: "'Inter'", size: 11, weight:'600' }, usePointStyle: true, boxWidth: 7, padding:14 } },
         tooltip: {
-          backgroundColor:'rgba(11,13,18,.94)',
-          borderColor:'rgba(255,255,255,.12)', borderWidth:1,
-          titleColor:'#fff', bodyColor:'rgba(255,255,255,.68)',
+          backgroundColor:isNight ? 'rgba(10,10,12,.94)' : 'rgba(255,255,255,.94)',
+          borderColor:isNight ? 'rgba(255,255,255,.12)' : 'rgba(39,39,42,.12)', borderWidth:1,
+          titleColor:isNight ? '#fff' : '#18181b', bodyColor:isNight ? 'rgba(255,255,255,.68)' : 'rgba(39,39,42,.68)',
           padding: 10, cornerRadius: 10, titleFont:{family:"'Inter'", weight:'700'}, bodyFont:{family:"'JetBrains Mono'"}
         }
       },
@@ -1715,7 +1717,11 @@ function registerEventListeners(){
   try{
     document.getElementById('daynight-switch').addEventListener('click', () => {
       manualOverride = true;
-      applyNight(!document.body.classList.contains('night'));
+      const nextIsNight = !document.body.classList.contains('night');
+      if(backgroundManager){
+        backgroundManager.setSetting('theme', nextIsNight ? 'dark' : 'light');
+      }
+      applyNight(nextIsNight);
     });
 
     document.querySelectorAll('.tab-btn').forEach(btn => {
