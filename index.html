@@ -6,7 +6,7 @@
 <title>Aero Clima — Pronóstico Completo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -44,7 +44,7 @@ body.night{
 *{box-sizing:border-box; margin:0; padding:0;}
 html{-webkit-text-size-adjust:100%;}
 body{
-  font-family:'Inter','Segoe UI','SF Pro Display',system-ui,sans-serif;
+  font-family:'Manrope','SF Pro Display','Segoe UI',system-ui,sans-serif;
   color:var(--ink); min-height:100vh; padding:20px 16px 70px; position:relative;
   overflow-x:hidden; transition:color .6s var(--ease); letter-spacing:-.005em;
 }
@@ -408,6 +408,9 @@ body,body.night{background:var(--background-dark);color:var(--text-primary)}
 #bg-fx{z-index:1;background:transparent!important;filter:none!important}#bg-fx>*{display:none}#bg-fx .rain-layer{display:block;opacity:0}body[data-weather-type="rain"] #bg-fx .rain-layer,body[data-weather-type="storm"] #bg-fx .rain-layer{opacity:.18}.wrap{z-index:2}.glass{background:var(--glass-dark);border-color:var(--border-glass);box-shadow:0 16px 42px -20px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.1);backdrop-filter:blur(20px) saturate(120%);-webkit-backdrop-filter:blur(20px) saturate(120%)}.glass::before{background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);opacity:.45}.card{border-radius:30px}.card-title,.model-name,.hero-sub,.loc-name,.loc-label,.day-name small,.day-tmin,.hour-time,.gauge-lbl{color:var(--text-secondary)}h1,.hero-number,.model-val,.day-name,.day-tmax,.gauge-pct,.tband-val{color:var(--text-primary)}.hero-number{background:none}.aero-btn,.dn-switch{background:rgba(18,17,15,.66);border-color:var(--border-glass);color:#fff}.aero-btn.primary,.tab-btn.active,.sub-btn.active{background:var(--accent);color:#11110f}.tabbar{background:rgba(18,17,15,.84);border-color:var(--border-glass)}.tab-btn{color:var(--text-secondary)}.tab-btn.active svg{color:#11110f;filter:none}.model-chip,.hour-item,.day-card{background:var(--glass-dark-strong);border-color:var(--border-glass)}.hour-item:first-child{background:var(--accent);border-color:var(--accent)}.hour-item:first-child .hour-time,.hour-item:first-child .hour-temp{color:#11110f}.hour-item:first-child .hour-precip{color:rgba(17,17,15,.7)}.hour-precip{color:#9ac9ff}.day-bar{background:rgba(255,255,255,.16)}.day-bar-fill{background:linear-gradient(90deg,#ffcf78,var(--accent))}.subtabs{background:var(--glass-dark);border-color:var(--border-glass)}.sub-btn{color:var(--text-secondary)}.background-attribution{display:inline-flex;align-items:center;gap:5px;margin:2px 8px 12px;color:rgba(255,255,255,.72);font-size:10px;text-decoration:none;padding:6px 9px;border:1px solid var(--border-glass);border-radius:999px;background:rgba(17,17,15,.42);backdrop-filter:blur(10px)}.background-attribution::before{content:'ⓘ';color:var(--accent)}body.night .glass,body.night .model-chip,body.night .hour-item,body.night .day-card{background:var(--glass-dark-strong)}
 #tab-hoy .models-grid{grid-template-columns:1.15fr .85fr}#tab-hoy .model-chip:nth-child(1){grid-row:span 2;min-height:166px;display:flex;flex-direction:column;justify-content:flex-end}#tab-hoy .model-chip:nth-child(1) .model-val{font-size:34px}#tab-hoy .model-chip:nth-child(3){background:rgba(255,138,42,.19)}#tab-hoy .model-chip:nth-child(4){grid-column:span 2;min-height:auto}.chart-container{background:transparent}.foot-note{color:rgba(255,255,255,.55);text-shadow:0 2px 12px #000}@media (prefers-reduced-motion:reduce){.app-background__image{transition:none}}@media (min-width:720px){.tabbar{background:var(--glass-dark)}.tab-btn.active{background:var(--accent);color:#11110f}.tab-btn.active svg{color:#11110f}}
 .settings-card{display:flex;flex-direction:column;gap:3px}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 0;border-bottom:1px solid var(--border-glass);color:var(--text-primary);font-size:13px}.setting-row:last-of-type{border-bottom:0}.setting-row span{display:flex;flex-direction:column;gap:4px}.setting-row small{color:var(--text-secondary);font-size:11px;line-height:1.35}.setting-row input{appearance:none;width:42px;height:25px;border-radius:999px;background:rgba(255,255,255,.18);position:relative;flex:0 0 auto;cursor:pointer}.setting-row input::after{content:"";position:absolute;width:19px;height:19px;border-radius:50%;top:3px;left:3px;background:#fff;transition:transform .2s ease}.setting-row input:checked{background:var(--accent)}.setting-row input:checked::after{transform:translateX(17px)}.setting-row select{max-width:135px;border:1px solid var(--border-glass);border-radius:12px;background:rgba(0,0,0,.32);color:#fff;padding:8px;font:inherit}.settings-refresh{margin-top:14px;width:100%;height:auto;font-size:13px;padding:12px}.reduce-motion .app-background__image{transition:none!important}
+/* AeroClima V2 local-theme layer */
+body:not(.night){--background-dark:#efece6;--glass-dark:rgba(255,255,255,.48);--glass-dark-strong:rgba(255,255,255,.65);--text-primary:#1d1d1b;--text-secondary:rgba(29,29,27,.62);--border-glass:rgba(255,255,255,.5);--ink:var(--text-primary);--ink-soft:var(--text-secondary);--ink-faint:rgba(29,29,27,.48);--glass:var(--glass-dark);--glass-strong:var(--glass-dark-strong);--glass-border:var(--border-glass);--glass-shadow:rgba(46,41,35,.18);--accent:#e7782e;background:var(--background-dark);color:var(--text-primary)}
+body:not(.night) .app-background__overlay{background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(247,244,238,.48) 58%,rgba(239,236,230,.78))}body:not(.night) .glass,body:not(.night) .model-chip,body:not(.night) .hour-item,body:not(.night) .day-card{background:var(--glass-dark-strong);border-color:rgba(255,255,255,.66);box-shadow:0 16px 38px -25px rgba(42,35,27,.3),inset 0 1px 0 rgba(255,255,255,.85)}body:not(.night) .tabbar{background:rgba(255,255,255,.64);border-color:rgba(255,255,255,.68)}body:not(.night) .tab-btn{color:rgba(29,29,27,.58)}body:not(.night) .tab-btn.active,body:not(.night) .sub-btn.active{color:#fff}body:not(.night) .tab-btn.active svg{color:#fff}body:not(.night) .aero-btn,body:not(.night) .dn-switch{background:rgba(255,255,255,.64);color:var(--text-primary);border-color:rgba(255,255,255,.72)}body:not(.night) .background-attribution,body:not(.night) .foot-note{color:rgba(29,29,27,.55);text-shadow:none}.app-background__image{filter:blur(48px) saturate(.72) brightness(.82);transform:scale(1.13)}body:not(.night) .app-background__image{filter:blur(48px) saturate(.68) brightness(1.08)}.background-preview{height:86px;border-radius:20px;background-size:cover;background-position:center;filter:blur(.2px) saturate(.82);box-shadow:inset 0 0 0 1px rgba(255,255,255,.24);margin:-2px 0 8px}.background-preview.is-dark{filter:blur(.2px) brightness(.68) saturate(.72)}
 </style>
 </head>
 <body>
@@ -688,6 +691,8 @@ function initBackground(){
 function applyNight(isNight){
   try{
     document.body.classList.toggle('night', isNight);
+    if(backgroundManager) backgroundManager.syncTheme(isNight);
+    isNight = document.body.classList.contains('night');
     document.getElementById('daynight-switch').classList.toggle('is-night', isNight);
     document.getElementById('dn-thumb').innerHTML = isNight
       ? `<svg viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z" fill="#5b6f8c"/></svg>`
@@ -715,12 +720,8 @@ function updateMood(meanMm, maxMm){
 }
 
 function updateDynamicBackground(data){
-  try{
-    if(!backgroundManager || !current || !data || !data.current_weather) return;
-    backgroundManager.update({ location:current, weatherCode:data.current_weather.weathercode, data });
-  }catch(e){
-    console.error('updateDynamicBackground:', e);
-  }
+  // Reservado para la futura selección automática por ubicación, hora y clima.
+  // La versión actual usa únicamente los fondos locales elegidos en Ajustes.
 }
 
 /* ============================================================
@@ -1467,27 +1468,30 @@ function renderTable(data){
 function renderSettings(){
   const panel = document.getElementById('tab-ajustes');
   if(!panel) return;
-  const config = (backgroundManager && backgroundManager.config) || window.AEROCLIMA_CONFIG || {};
+  if(!backgroundManager) return;
+  const settings = backgroundManager.settings;
+  const options = (window.AEROCLIMA_BACKGROUNDS || []).map(item => `<option value="${item.id}">${item.label}</option>`).join('');
   panel.innerHTML = `
     <div class="glass card settings-card">
-      <div class="card-title">Preferencias visuales</div>
-      <label class="setting-row"><span><strong>Fondos dinámicos</strong><small>Adaptados al clima, lugar y hora</small></span><input id="dynamic-bg-toggle" type="checkbox" checked></label>
-      <label class="setting-row"><span><strong>Fuente de fondos</strong><small>Las fuentes remotas requieren un proxy propio</small></span><select id="background-provider"><option value="auto">Automática</option><option value="local">Solo fondos locales</option><option value="unsplash">Unsplash</option><option value="pexels">Pexels</option></select></label>
-      <label class="setting-row"><span><strong>Reducir uso de datos</strong><small>Usa caché y fondos locales</small></span><input id="reduce-data-toggle" type="checkbox" ${config.reduceData ? 'checked' : ''}></label>
-      <label class="setting-row"><span><strong>Animaciones</strong><small>Transiciones suaves entre fondos</small></span><input id="animations-toggle" type="checkbox" ${config.animations !== false ? 'checked' : ''}></label>
-      <button class="aero-btn primary settings-refresh" id="refresh-bg-btn">Cambiar fondo ahora</button>
+      <div class="card-title">Apariencia</div>
+      <label class="setting-row"><span><strong>Tema</strong><small>Claro, oscuro o según la hora</small></span><select id="theme-mode"><option value="light">Claro</option><option value="dark">Oscuro</option><option value="auto">Automático</option></select></label>
+      <label class="setting-row"><span><strong>Fondo modo claro</strong><small>Vista local para momentos luminosos</small></span><select id="light-background">${options}</select></label>
+      <div class="background-preview" id="light-preview"></div>
+      <label class="setting-row"><span><strong>Fondo modo oscuro</strong><small>Vista local para la noche</small></span><select id="dark-background">${options}</select></label>
+      <div class="background-preview is-dark" id="dark-preview"></div>
+      <label class="setting-row"><span><strong>Animaciones</strong><small>Transiciones lentas y discretas</small></span><select id="animation-mode"><option value="normal">Normales</option><option value="reduced">Reducidas</option></select></label>
+      <button class="aero-btn primary settings-refresh" id="reset-appearance-btn">Restablecer apariencia</button>
     </div>`;
-  const provider = document.getElementById('background-provider');
-  provider.value = config.imageProvider || 'auto';
-  document.getElementById('dynamic-bg-toggle').addEventListener('change', e => {
-    document.querySelector('.app-background').style.display = e.target.checked ? '' : 'none';
-  });
-  provider.addEventListener('change', e => { if(backgroundManager) backgroundManager.config.imageProvider=e.target.value; });
-  document.getElementById('reduce-data-toggle').addEventListener('change', e => { if(backgroundManager) backgroundManager.config.reduceData=e.target.checked; });
-  document.getElementById('animations-toggle').addEventListener('change', e => {
-    if(backgroundManager){ backgroundManager.config.animations=e.target.checked; document.documentElement.classList.toggle('reduce-motion', !e.target.checked); }
-  });
-  document.getElementById('refresh-bg-btn').addEventListener('click', () => { if(backgroundManager) backgroundManager.currentKey=''; updateDynamicBackground(lastGeneralData); });
+  const theme = document.getElementById('theme-mode'), light = document.getElementById('light-background'), dark = document.getElementById('dark-background'), animation = document.getElementById('animation-mode');
+  theme.value=settings.theme; light.value=settings.lightBackground; dark.value=settings.darkBackground; animation.value=settings.animations;
+  const preview = (id, mode, background) => { document.getElementById(id).style.backgroundImage=`url("assets/backgrounds/${mode}/${background}.webp")`; };
+  const sync = () => { backgroundManager.syncTheme(document.body.classList.contains('night')); preview('light-preview','light',backgroundManager.settings.lightBackground); preview('dark-preview','dark',backgroundManager.settings.darkBackground); };
+  theme.addEventListener('change', e => { backgroundManager.setSetting('theme',e.target.value); manualOverride=e.target.value !== 'auto'; if(e.target.value === 'auto') updateDayNightAuto(); else sync(); });
+  light.addEventListener('change', e => { backgroundManager.setSetting('lightBackground',e.target.value); sync(); });
+  dark.addEventListener('change', e => { backgroundManager.setSetting('darkBackground',e.target.value); sync(); });
+  animation.addEventListener('change', e => { backgroundManager.setSetting('animations',e.target.value); sync(); });
+  document.getElementById('reset-appearance-btn').addEventListener('click', () => { backgroundManager.reset(); manualOverride=false; updateDayNightAuto(); renderSettings(); });
+  sync();
 }
 
 function registerEventListeners(){
@@ -1551,9 +1555,9 @@ async function initApp(){
   try{
     // 2. Fondo animado
     initBackground();
-    if(window.DynamicBackgroundManager){
-      backgroundManager = new DynamicBackgroundManager();
-      await backgroundManager.init();
+    if(window.LocalBackgroundManager){
+      backgroundManager = new LocalBackgroundManager();
+      backgroundManager.init();
     }
 
     // 3. Tema día/noche inicial (según la hora local). refreshChartsForTheme()

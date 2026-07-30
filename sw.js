@@ -1,8 +1,11 @@
-const CACHE_NAME = 'aero-clima-v5';
+const CACHE_NAME = 'aero-clima-v6';
 const APP_SHELL = [
   './index.html', './manifest.json', './icon-192.png', './icon-512.png', './config.js',
-  './js/background-manager.js', './data/location-environments.json',
-  './assets/backgrounds/generic/day.webp', './assets/backgrounds/generic/night.webp'
+  './js/background-manager.js',
+  './assets/backgrounds/light/beach.webp', './assets/backgrounds/light/mountain.webp', './assets/backgrounds/light/city.webp', './assets/backgrounds/light/desert.webp',
+  './assets/backgrounds/light/forest.webp', './assets/backgrounds/light/lake.webp', './assets/backgrounds/light/rural.webp', './assets/backgrounds/light/rocky-coast.webp',
+  './assets/backgrounds/dark/beach.webp', './assets/backgrounds/dark/mountain.webp', './assets/backgrounds/dark/city.webp', './assets/backgrounds/dark/desert.webp',
+  './assets/backgrounds/dark/forest.webp', './assets/backgrounds/dark/lake.webp', './assets/backgrounds/dark/rural.webp', './assets/backgrounds/dark/rocky-coast.webp'
 ];
 
 self.addEventListener('install', (event) => {
