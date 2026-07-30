@@ -1,0 +1,8 @@
+ext {
+    minSdkVersion = 23
+    compileSdkVersion = 35
+    targetSdkVersion = 35
+    androidxActivityVersion = '1.10.1'
+    androidxCoreVersion = '1.15.0'
+    coreSplashScreenVersion = '1.0.1'
+}

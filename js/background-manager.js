@@ -14,6 +14,7 @@
     constructor(){
       this.layers=[];
       this.activeLayer=0;
+      this.loadVersion=0;
       this.settings=this.readSettings();
     }
     init(){
@@ -41,15 +42,25 @@
       if(!this.layers.length) return;
       const background=theme==='dark' ? this.settings.darkBackground : this.settings.lightBackground;
       const url=`assets/backgrounds/${theme}/${background}.webp`;
-      const next=(this.activeLayer+1)%this.layers.length;
+      const version=++this.loadVersion;
       const image=new Image();
       image.onload=()=>{
+        // Al iniciar, el modo automático puede solicitar otro fondo antes de que
+        // termine de cargar el primero. Solo la solicitud más reciente puede
+        // cambiar las capas, para evitar que una carga anterior oculte la nueva.
+        if(version!==this.loadVersion) return;
+        const previous=this.activeLayer;
+        const next=(previous+1)%this.layers.length;
         const layer=this.layers[next];
         layer.style.backgroundImage=`url("${url}")`;
         layer.classList.add('is-visible');
-        this.layers[this.activeLayer].classList.remove('is-visible');
+        if(previous!==next) this.layers[previous].classList.remove('is-visible');
         this.activeLayer=next;
         document.documentElement.classList.toggle('reduce-motion', this.settings.animations==='reduced');
+      };
+      image.onerror=()=>{
+        if(version!==this.loadVersion) return;
+        console.warn(`No se pudo cargar el fondo local: ${url}`);
       };
       image.src=url;
     }

@@ -1,4 +1,6 @@
-const CACHE_NAME = 'aero-clima-v6';
+// Cambiar la versión fuerza a que instalaciones existentes reciban el gestor
+// de fondos corregido en vez de conservar el JavaScript anterior en caché.
+const CACHE_NAME = 'aero-clima-v7';
 const APP_SHELL = [
   './index.html', './manifest.json', './icon-192.png', './icon-512.png', './config.js',
   './js/background-manager.js',

@@ -1,0 +1,23 @@
+{
+  "name": "aeroclima",
+  "version": "2.0.0",
+  "private": true,
+  "description": "AeroClima PWA empaquetada como aplicación Android con Capacitor.",
+  "scripts": {
+    "test:backgrounds": "node tests/background-manager.test.js",
+    "web:prepare": "node scripts/prepare-web.mjs",
+    "android:sync": "npm run web:prepare && npx cap sync android",
+    "android:open": "npm run android:sync && npx cap open android",
+    "android:debug": "npm run android:sync && cd android && gradlew.bat assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/preferences": "^7.0.0",
+    "@capacitor/splash-screen": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
+  }
+}
