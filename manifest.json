@@ -1,15 +1,9 @@
-{
-  "name": "Aero Clima — Pronóstico Completo",
-  "short_name": "Aero Clima",
-  "description": "Pronóstico del clima y comparador de modelos de lluvia",
-  "start_url": "./index.html",
-  "scope": "./",
-  "display": "standalone",
-  "background_color": "#f3ede3",
-  "theme_color": "#1b1916",
-  "orientation": "portrait",
-  "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
-  ]
-}
+/* Configuración local segura. Para usar Unsplash o Pexels, configura un proxy propio;
+   nunca agregues una clave de API directamente en este archivo. */
+window.AEROCLIMA_CONFIG = {
+  imageProvider: 'local',
+  imageApiEndpoint: '',
+  imageProxyEndpoint: '',
+  reduceData: false,
+  animations: true
+};
