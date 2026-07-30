@@ -1,0 +1,119 @@
+(function(){
+  'use strict';
+
+  const CACHE_DURATION = 24 * 60 * 60 * 1000;
+  const ENV_CACHE_DURATION = 7 * 24 * 60 * 60 * 1000;
+  const ENVIRONMENT_TYPES = Object.freeze({ COAST:'coast', MOUNTAIN:'mountain', CITY:'city', DESERT:'desert', FOREST:'forest', LAKE:'lake', RURAL:'rural', GENERIC:'generic' });
+  const TIME_PERIODS = Object.freeze({ DAWN:'dawn', DAY:'day', SUNSET:'sunset', NIGHT:'night' });
+
+  class ImageProvider { async searchBackground(){ return null; } }
+  class LocalImageProvider extends ImageProvider {
+    async searchBackground({ environment, timePeriod }){
+      const time = timePeriod === TIME_PERIODS.NIGHT ? 'night' : 'day';
+      return { imageUrl:`assets/backgrounds/${environment}/${time}.webp`, photographer:'AeroClima', photographerUrl:'', source:'Local', sourceUrl:'', environment, timePeriod };
+    }
+  }
+  class RemoteProvider extends ImageProvider {
+    constructor(config, name){ super(); this.config=config; this.name=name; }
+    async searchBackground({ query, environment, timePeriod }){
+      if(!this.config.imageApiEndpoint || this.config.reduceData) return null;
+      const url = new URL(this.config.imageApiEndpoint, window.location.href);
+      url.searchParams.set('query', query);
+      const response = await fetch(url, { headers:{ Accept:'application/json' } });
+      if(!response.ok) throw new Error(`Image provider ${this.name} unavailable`);
+      const data = await response.json();
+      if(!data.imageUrl) return null;
+      return { imageUrl:data.imageUrl, photographer:data.photographer || 'Fotógrafo', photographerUrl:data.photographerUrl || '', source:data.source || this.name, sourceUrl:data.sourceUrl || '', environment, timePeriod };
+    }
+  }
+  class UnsplashProvider extends RemoteProvider { constructor(config){ super(config, 'Unsplash'); } }
+  class PexelsProvider extends RemoteProvider { constructor(config){ super(config, 'Pexels'); } }
+
+  class DynamicBackgroundManager {
+    constructor(){
+      this.config = Object.assign({ imageProvider:'local', imageApiEndpoint:'', reduceData:false, animations:true }, window.AEROCLIMA_CONFIG || {});
+      this.environmentRules = {};
+      this.currentKey = '';
+      this.activeLayer = 0;
+      this.layers = [];
+      this.attribution = null;
+    }
+    async init(){
+      this.layers = Array.from(document.querySelectorAll('.app-background__image'));
+      this.attribution = document.getElementById('background-attribution');
+      try { this.environmentRules = await fetch('data/location-environments.json').then(r => r.ok ? r.json() : {}); } catch(e) { this.environmentRules = {}; }
+    }
+    getWeatherType(code){
+      if(code === 0) return 'clear'; if([1,2,3].includes(code)) return 'cloudy'; if([45,48].includes(code)) return 'fog';
+      if([51,53,55,61,63,65,80,81,82].includes(code)) return 'rain'; if([71,73,75,77,85,86].includes(code)) return 'snow';
+      if([95,96,99].includes(code)) return 'storm'; return 'clear';
+    }
+    getEnvironment(location){
+      const name = ((location && location.name) || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      const cached = this.read(`aero-env:${name}`);
+      if(cached && Date.now()-cached.timestamp < ENV_CACHE_DURATION) return cached.value;
+      const match = Object.keys(this.environmentRules).find(key => name.includes(key.normalize('NFD').replace(/[\u0300-\u036f]/g,'')));
+      let environment = match ? this.environmentRules[match] : ENVIRONMENT_TYPES.GENERIC;
+      if(!match && /coast|playa|bah[ií]a|mar/.test(name)) environment=ENVIRONMENT_TYPES.COAST;
+      else if(!match && /cerro|cordillera|andes|mountain/.test(name)) environment=ENVIRONMENT_TYPES.MOUNTAIN;
+      else if(!match && /desierto|atacama/.test(name)) environment=ENVIRONMENT_TYPES.DESERT;
+      this.write(`aero-env:${name}`, environment); return environment;
+    }
+    getTimePeriod(data){
+      const offset = (data && Number.isFinite(data.utc_offset_seconds)) ? data.utc_offset_seconds * 1000 : 0;
+      const now = new Date(Date.now() + offset);
+      const daily = data && data.daily;
+      const locationDate = value => new Date(Date.parse(`${value}Z`) + offset);
+      const sunrise = daily && daily.sunrise && daily.sunrise[0] ? locationDate(daily.sunrise[0]) : null;
+      const sunset = daily && daily.sunset && daily.sunset[0] ? locationDate(daily.sunset[0]) : null;
+      if(sunrise && sunset){
+        const dawnStart = new Date(sunrise.getTime()-60*60000), dawnEnd = new Date(sunrise.getTime()+90*60000);
+        const sunsetStart = new Date(sunset.getTime()-90*60000), sunsetEnd = new Date(sunset.getTime()+60*60000);
+        if(now >= dawnStart && now <= dawnEnd) return TIME_PERIODS.DAWN;
+        if(now >= sunsetStart && now <= sunsetEnd) return TIME_PERIODS.SUNSET;
+        if(now > dawnEnd && now < sunsetStart) return TIME_PERIODS.DAY;
+        return TIME_PERIODS.NIGHT;
+      }
+      const hour=now.getHours(); return hour >= 19 || hour < 6 ? TIME_PERIODS.NIGHT : (hour < 8 ? TIME_PERIODS.DAWN : (hour >= 17 ? TIME_PERIODS.SUNSET : TIME_PERIODS.DAY));
+    }
+    buildQuery(environment, weatherType, timePeriod, location){
+      const place = ((location && location.name) || '').toLowerCase();
+      const regional = place.includes('atacama') ? 'Atacama Chile ' : (place.includes('chile') ? 'Chile ' : '');
+      return `${regional}${environment} ${timePeriod} ${weatherType} vertical`;
+    }
+    provider(){
+      if(this.config.imageProvider === 'unsplash') return new UnsplashProvider(this.config);
+      if(this.config.imageProvider === 'pexels') return new PexelsProvider(this.config);
+      return new LocalImageProvider();
+    }
+    async update({ location, weatherCode, data }){
+      if(!this.layers.length) return;
+      const environment=this.getEnvironment(location), weatherType=this.getWeatherType(weatherCode), timePeriod=this.getTimePeriod(data);
+      const region=((location && location.name) || 'generic').split(',')[0].toLowerCase().replace(/[^a-z0-9]+/g,'-');
+      const key=`${environment}:${weatherType}:${timePeriod}:${region}`;
+      if(key === this.currentKey) return;
+      const cached=this.read(`aero-bg:${key}`);
+      let background=cached && Date.now()-cached.timestamp<CACHE_DURATION ? cached.value : null;
+      if(!background){
+        try { background=await this.provider().searchBackground({ query:this.buildQuery(environment,weatherType,timePeriod,location), environment,timePeriod,weatherType }); } catch(e) { background=null; }
+      }
+      if(!background) background=await new LocalImageProvider().searchBackground({environment:ENVIRONMENT_TYPES.GENERIC,timePeriod,weatherType});
+      this.preloadAndApply(background, key, weatherType);
+      this.write(`aero-bg:${key}`, background);
+    }
+    preloadAndApply(background, key, weatherType){
+      const image=new Image(); image.onload=()=>{ this.apply(background,key,weatherType); }; image.onerror=()=>{
+        if(background.environment !== ENVIRONMENT_TYPES.GENERIC) this.apply({ imageUrl:`assets/backgrounds/generic/${background.timePeriod === TIME_PERIODS.NIGHT ? 'night' : 'day'}.webp`, photographer:'AeroClima', source:'Local' },key,weatherType);
+      }; image.src=background.imageUrl;
+    }
+    apply(background,key,weatherType){
+      const next=(this.activeLayer+1)%this.layers.length, layer=this.layers[next];
+      layer.style.backgroundImage=`url("${background.imageUrl}")`; layer.classList.add('is-visible'); this.layers[this.activeLayer].classList.remove('is-visible'); this.activeLayer=next; this.currentKey=key;
+      document.body.dataset.weatherType=weatherType;
+      if(this.attribution){ const label=background.source === 'Local' ? 'Fondo local AeroClima' : `Foto: ${background.photographer} · ${background.source}`; this.attribution.textContent=label; this.attribution.href=background.photographerUrl || background.sourceUrl || '#'; }
+    }
+    read(key){ try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; } }
+    write(key,value){ try { localStorage.setItem(key,JSON.stringify({ value,timestamp:Date.now() })); } catch(e) {} }
+  }
+  window.ENVIRONMENT_TYPES=ENVIRONMENT_TYPES; window.TIME_PERIODS=TIME_PERIODS; window.ImageProvider=ImageProvider; window.UnsplashProvider=UnsplashProvider; window.PexelsProvider=PexelsProvider; window.LocalImageProvider=LocalImageProvider; window.DynamicBackgroundManager=DynamicBackgroundManager;
+})();
