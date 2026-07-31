@@ -614,3 +614,236 @@ body:not(.night) .foot-note{color:rgba(39,39,42,.44)!important}
 body:not(.night) th{background:rgba(255,255,255,.36)!important;color:rgba(39,39,42,.50)}
 body:not(.night) td{color:rgba(39,39,42,.62);border-color:rgba(255,255,255,.58)}
 body:not(.night) td:first-child{color:var(--day-text)}
+
+/* Header greeting, five-item dock, unclipped rain gauge and forecast accordion. */
+.greeting-title{
+  margin:0;
+  font-size:24px!important;
+  line-height:1.15;
+  font-weight:600!important;
+  letter-spacing:-.025em!important;
+}
+body.night .greeting-title{color:#fff!important}
+body:not(.night) .greeting-title{color:#18181b!important}
+
+.tabbar,
+body.night .tabbar,
+body:not(.night) .tabbar{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  align-items:stretch;
+}
+.tab-btn,
+body.night .tab-btn,
+body:not(.night) .tab-btn,
+.tab-btn.active,
+body.night .tab-btn.active,
+body:not(.night) .tab-btn.active{
+  width:100%;
+  min-width:0;
+  flex:none;
+  flex-direction:column;
+  justify-content:center;
+  gap:3px;
+  padding:7px 2px;
+}
+
+#hero-card .hero,
+#hero-card .hero-right,
+#hero-card .gauge-wrap{
+  overflow:visible!important;
+}
+#hero-card .gauge-wrap,
+.gauge-wrap{
+  width:116px;
+  height:116px;
+  padding:8px;
+  box-sizing:border-box;
+  overflow:visible!important;
+}
+.gauge-wrap svg{
+  width:100%;
+  height:100%;
+  overflow:visible!important;
+}
+.gauge-wrap .gauge-center{inset:8px}
+
+.day-card,
+body.night .day-card,
+body:not(.night) .day-card{
+  display:block;
+  padding:0!important;
+  overflow:visible;
+  transition:border-color .22s ease,box-shadow .22s ease,transform .22s ease;
+}
+.day-card:hover{transform:translateY(-1px)}
+.day-card.is-expanded{
+  border-color:rgba(249,115,22,.34)!important;
+  box-shadow:0 12px 32px rgba(0,0,0,.14),0 0 18px rgba(249,115,22,.09)!important;
+}
+.day-summary{
+  width:100%;
+  display:grid;
+  grid-template-columns:minmax(74px,1fr) 36px minmax(88px,auto) 20px;
+  align-items:center;
+  gap:9px;
+  padding:14px;
+  border:0;
+  border-radius:18px;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+}
+.day-summary:focus-visible{
+  outline:2px solid rgba(249,115,22,.72);
+  outline-offset:3px;
+}
+.day-summary .day-name{min-width:0}
+.day-summary .day-icon{display:block}
+.day-summary .day-precip,
+.day-summary .day-uv{display:none}
+.day-summary .day-temps{
+  display:flex;
+  min-width:88px;
+  justify-content:flex-end;
+}
+.day-summary .day-bar{display:block;overflow:hidden}
+.day-summary .day-bar-fill{display:block;height:100%;position:absolute;border-radius:inherit}
+.day-chevron{
+  width:20px;
+  height:20px;
+  display:grid;
+  place-items:center;
+  color:rgba(255,255,255,.46);
+  transition:transform .24s ease,color .24s ease;
+}
+.day-chevron svg{width:18px;height:18px}
+.day-card.is-expanded .day-chevron{
+  transform:rotate(180deg);
+  color:#fb923c;
+}
+.day-details{
+  margin:0 12px 12px;
+  padding:12px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:16px;
+  background:rgba(255,255,255,.035);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(28px) saturate(180%);
+  -webkit-backdrop-filter:blur(28px) saturate(180%);
+  animation:forecastDetailsIn .22s ease both;
+}
+.day-details[hidden]{display:none}
+@keyframes forecastDetailsIn{
+  from{opacity:0;transform:translateY(-5px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.day-hourly-carousel{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding:2px 2px 10px;
+  scroll-snap-type:x proximity;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(255,255,255,.16) transparent;
+}
+.day-hourly-carousel::-webkit-scrollbar{height:4px}
+.day-hourly-carousel::-webkit-scrollbar-thumb{
+  border-radius:999px;
+  background:rgba(255,255,255,.16);
+}
+.day-hour-item{
+  flex:0 0 62px;
+  min-height:104px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  padding:9px 5px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:15px;
+  background:rgba(255,255,255,.045);
+  scroll-snap-align:start;
+}
+.day-hour-time,
+.day-hour-rain{
+  color:rgba(255,255,255,.50);
+  font-size:9px;
+  font-weight:600;
+}
+.day-hour-icon{width:26px;height:26px}
+.day-hour-temp{
+  color:#fff;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+}
+.day-hour-rain{color:#22d3ee}
+.day-metrics-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-top:2px;
+}
+.day-metric{
+  min-height:68px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  gap:8px;
+  padding:11px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:14px;
+  background:rgba(255,255,255,.04);
+}
+.day-metric span{
+  color:rgba(255,255,255,.45);
+  font-size:9px;
+  line-height:1.25;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.day-metric strong{
+  color:#fff;
+  font-family:'Manrope',sans-serif;
+  font-size:14px;
+  font-weight:500;
+}
+
+body:not(.night) .day-chevron{color:rgba(39,39,42,.44)}
+body:not(.night) .day-details{
+  background:rgba(255,255,255,.34);
+  border-color:rgba(255,255,255,.62);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.78);
+}
+body:not(.night) .day-hour-item,
+body:not(.night) .day-metric{
+  background:rgba(255,255,255,.40);
+  border-color:rgba(255,255,255,.62);
+}
+body:not(.night) .day-card{
+  background:rgba(255,255,255,.40)!important;
+  border-color:rgba(255,255,255,.60)!important;
+}
+body.night .day-card{
+  background:rgba(255,255,255,.04)!important;
+  border-color:rgba(255,255,255,.15)!important;
+}
+body:not(.night) .day-hour-time,
+body:not(.night) .day-metric span{color:rgba(39,39,42,.56)}
+body:not(.night) .day-hour-temp,
+body:not(.night) .day-metric strong{color:#18181b}
+body:not(.night) .day-hour-rain{color:#008cab}
+
+@media (min-width:720px){
+  .day-summary{
+    grid-template-columns:minmax(110px,1fr) 40px minmax(120px,auto) 68px minmax(110px,auto) 22px;
+    gap:14px;
+  }
+  .day-summary .day-precip,
+  .day-summary .day-uv{display:flex}
+  .day-summary .day-uv{justify-content:center}
+  .day-metrics-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}

@@ -598,7 +598,7 @@ body:not(.night) .loc-name,body:not(.night) .day-name small,body:not(.night) .da
   .tabbar{position:sticky;top:16px}
 }
 </style>
-<link rel="stylesheet" href="css/spatial-complete.css?v=13">
+<link rel="stylesheet" href="css/spatial-complete.css?v=15">
 </head>
 <body>
 
@@ -630,7 +630,7 @@ body:not(.night) .loc-name,body:not(.night) .day-name small,body:not(.night) .da
         <svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M4 14a4 4 0 013-6.86A5 5 0 0116.9 9H17a4 4 0 010 8H6a3 3 0 01-2-5.24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Pronóstico completo · Multi-modelo
       </div>
-      <h1>Aero Clima</h1>
+      <h1 class="greeting-title" id="greeting-title">Buenos días</h1>
       <div class="loc-row">
         <svg class="loc-pin" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.6 7-11.5A7 7 0 105 9.5C5 14.4 12 21 12 21z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="9.5" r="2.4" stroke="currentColor" stroke-width="1.7"/></svg>
         <span class="loc-label">Ubicación:</span>
@@ -655,7 +655,6 @@ body:not(.night) .loc-name,body:not(.night) .day-name small,body:not(.night) .da
     <button class="tab-btn" data-tab="pronostico"></button>
     <button class="tab-btn" data-tab="lluvia"></button>
     <button class="tab-btn" data-tab="alertas"></button>
-    <button class="tab-btn" data-tab="ajustes"></button>
   </div>
 
   <div class="tab-panel active" id="tab-hoy">
@@ -688,8 +687,6 @@ body:not(.night) .loc-name,body:not(.night) .day-name small,body:not(.night) .da
       <div class="glass card"><div class="status"><div class="spinner"></div>Analizando condiciones…</div></div>
     </div>
   </div>
-
-  <div class="tab-panel" id="tab-ajustes"></div>
 
   <div class="foot-note">
     Datos: Open-Meteo · Modelos de lluvia: ECMWF IFS, GFS (NOAA), ICON (DWD), GEM (ECCC), UKMO, Météo-France<br>
@@ -730,7 +727,8 @@ const ICONS = {
   bell: `<svg viewBox="0 0 24 24" fill="none"><path d="M18 16v-5a6 6 0 00-12 0v5l-2 3h16l-2-3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 20a2.5 2.5 0 005 0" stroke="currentColor" stroke-width="1.7"/></svg>`,
   check: `<svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="17" fill="url(#okG)"/><defs><linearGradient id="okG" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#bfe64d"/><stop offset="1" stop-color="#2fc98f"/></linearGradient></defs><path d="M17 24l5 5 9-11" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   sunrise: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 18h16M6 18a6 6 0 0112 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 3v4M5 9l2 2M19 9l-2 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
-  sunset: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 18h16M6 18a6 6 0 0112 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 10V6M5 9l2 2M19 9l-2 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`
+  sunset: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 18h16M6 18a6 6 0 0112 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 10V6M5 9l2 2M19 9l-2 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  chevron: `<svg viewBox="0 0 24 24" fill="none"><path d="m7 9.5 5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 };
 const TAB_META = {
   hoy:{icon:ICONS.home, label:'Hoy'},
@@ -738,7 +736,6 @@ const TAB_META = {
   pronostico:{icon:ICONS.calendar, label:'Pronóstico'},
   lluvia:{icon:ICONS.drop, label:'Lluvia'},
   alertas:{icon:ICONS.bell, label:'Alertas'},
-  ajustes:{icon:ICONS.models, label:'Ajustes'},
 };
 
 /* ============================================================
@@ -765,6 +762,7 @@ let horasChart = null;
 let lastRainData = null;
 let lastGeneralData = null;
 let lastRangeDays = 7;
+let expandedForecastDay = null;
 let backgroundManager = null;
 
 /* ============================================================
@@ -825,8 +823,8 @@ function formatTime(iso){
   return new Date(iso).toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
 }
 function gaugeSVG(pct, colorA, colorB, gradId){
-  const r=46, circ=2*Math.PI*r;
-  return `<svg viewBox="0 0 100 100"><defs><linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="100%">
+  const r=44, circ=2*Math.PI*r;
+  return `<svg viewBox="-10 -10 120 120" overflow="visible" aria-hidden="true"><defs><linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="100%">
     <stop offset="0%" stop-color="${colorA}"/><stop offset="100%" stop-color="${colorB}"/></linearGradient></defs>
     <circle class="gauge-track" cx="50" cy="50" r="${r}"/>
     <circle class="gauge-value" data-pct="${pct}" cx="50" cy="50" r="${r}" stroke="url(#${gradId})" stroke-dasharray="${circ}" stroke-dashoffset="${circ}"/></svg>`;
@@ -844,6 +842,20 @@ function animateGauges(){
       el.style.strokeDashoffset = circ - circ*(Math.max(0,Math.min(100,pct))/100);
     });
   });
+}
+
+function greetingForMinutes(minutes){
+  if(minutes >= 360 && minutes <= 720){
+    return 'Buenos días';
+  }
+  if(minutes > 720 && minutes <= 1200) return 'Buenas tardes';
+  return 'Buenas noches';
+}
+function updateGreeting(){
+  const greeting = document.getElementById('greeting-title');
+  if(!greeting) return;
+  const now = new Date();
+  greeting.textContent = greetingForMinutes(now.getHours() * 60 + now.getMinutes());
 }
 
 /* ============================================================
@@ -913,7 +925,7 @@ function updateMood(meanMm, maxMm){
 
 function updateDynamicBackground(data){
   // Reservado para la futura selección automática por ubicación, hora y clima.
-  // La versión actual usa únicamente los fondos locales elegidos en Ajustes.
+  // La versión actual usa la configuración local persistida.
 }
 
 /* ============================================================
@@ -1334,6 +1346,9 @@ function renderHorasChart(data){
 function renderPronostico(data, rangeDays){
   lastRangeDays = rangeDays;
   const days = data.daily.time.slice(0, rangeDays);
+  if(expandedForecastDay && !days.includes(expandedForecastDay)){
+    expandedForecastDay = null;
+  }
   let globalMax = Math.max(...data.daily.temperature_2m_max.slice(0,rangeDays));
   let globalMin = Math.min(...data.daily.temperature_2m_min.slice(0,rangeDays));
   const span = Math.max(globalMax - globalMin, 1);
@@ -1350,19 +1365,72 @@ function renderPronostico(data, rangeDays){
     const dateSub = new Date(day + 'T00:00:00').toLocaleDateString('es-CL', { day:'numeric', month:'short' });
     const leftPct = ((tmin - globalMin) / span) * 100;
     const widthPct = ((tmax - tmin) / span) * 100;
+    const isExpanded = expandedForecastDay === day;
+    const panelId = `forecast-details-${day}`;
+    const hourIndexes = data.hourly.time.reduce((indexes, time, index) => {
+      if(time.startsWith(day)) indexes.push(index);
+      return indexes;
+    }, []);
+    const finiteValues = (key) => hourIndexes
+      .map(index => data.hourly[key] ? data.hourly[key][index] : null)
+      .filter(Number.isFinite);
+    const humidityValues = finiteValues('relative_humidity_2m');
+    const windValues = finiteValues('wind_speed_10m');
+    const uvValues = finiteValues('uv_index');
+    const rainValues = finiteValues('precipitation');
+    const humidityAverage = humidityValues.length
+      ? humidityValues.reduce((sum, value) => sum + value, 0) / humidityValues.length
+      : null;
+    const windMaximum = Number.isFinite(data.daily.wind_speed_10m_max[i])
+      ? data.daily.wind_speed_10m_max[i]
+      : (windValues.length ? Math.max(...windValues) : null);
+    const uvMaximum = Number.isFinite(uv)
+      ? uv
+      : (uvValues.length ? Math.max(...uvValues) : null);
+    const rainAccumulated = Number.isFinite(precip)
+      ? precip
+      : rainValues.reduce((sum, value) => sum + value, 0);
+    const hourlyForecast = hourIndexes.map(index => {
+      const time = data.hourly.time[index].slice(11,16);
+      const hourCode = data.hourly.weathercode[index];
+      const temperature = data.hourly.temperature_2m[index];
+      const rainProbability = data.hourly.precipitation_probability
+        ? data.hourly.precipitation_probability[index]
+        : null;
+      return `<div class="day-hour-item" role="listitem">
+        <span class="day-hour-time">${time}</span>
+        <span class="day-hour-icon">${weatherCodeIcon(hourCode)}</span>
+        <strong class="day-hour-temp">${Number.isFinite(temperature) ? Math.round(temperature) + '°' : '—'}</strong>
+        <span class="day-hour-rain">${rainProbability != null ? Math.round(rainProbability) + '%' : '—'}</span>
+      </div>`;
+    }).join('');
 
     html += `
-      <div class="day-card">
-        <div class="day-name">${i===0 ? 'Hoy' : dateLabel}<small>${dateSub}</small></div>
-        <div class="day-icon">${weatherCodeIcon(code)}</div>
-        <div class="day-precip">${ICONS.drop}${precip.toFixed(1)}mm${prob!=null ? ' · '+prob+'%' : ''}</div>
-        <div class="day-uv" style="background:${uvInfo.colorA}33; color:${uvInfo.colorText};">UV ${Math.round(uv)}</div>
-        <div class="day-temps">
-          <span class="day-tmin">${Math.round(tmin)}°</span>
-          <div class="day-bar"><div class="day-bar-fill" style="left:${leftPct}%; width:${Math.max(widthPct,6)}%;"></div></div>
-          <span class="day-tmax">${Math.round(tmax)}°</span>
+      <article class="day-card${isExpanded ? ' is-expanded' : ''}" data-forecast-day="${day}">
+        <button class="day-summary" type="button" data-forecast-toggle="${day}" aria-expanded="${isExpanded}" aria-controls="${panelId}">
+          <span class="day-name">${i===0 ? 'Hoy' : dateLabel}<small>${dateSub}</small></span>
+          <span class="day-icon">${weatherCodeIcon(code)}</span>
+          <span class="day-precip">${ICONS.drop}${precip.toFixed(1)}mm${prob!=null ? ' · '+prob+'%' : ''}</span>
+          <span class="day-uv" style="background:${uvInfo.colorA}33; color:${uvInfo.colorText};">UV ${Math.round(uv)}</span>
+          <span class="day-temps">
+            <span class="day-tmin">${Math.round(tmin)}°</span>
+            <span class="day-bar"><span class="day-bar-fill" style="left:${leftPct}%; width:${Math.max(widthPct,6)}%;"></span></span>
+            <span class="day-tmax">${Math.round(tmax)}°</span>
+          </span>
+          <span class="day-chevron">${ICONS.chevron}</span>
+        </button>
+        <div class="day-details" id="${panelId}"${isExpanded ? '' : ' hidden'}>
+          <div class="day-hourly-carousel" role="list" aria-label="Pronóstico hora por hora para ${i===0 ? 'hoy' : dateLabel}">
+            ${hourlyForecast}
+          </div>
+          <div class="day-metrics-grid">
+            <div class="day-metric"><span>Viento máximo</span><strong>${windMaximum != null ? Math.round(windMaximum) + ' km/h' : '—'}</strong></div>
+            <div class="day-metric"><span>Humedad promedio</span><strong>${humidityAverage != null ? Math.round(humidityAverage) + '%' : '—'}</strong></div>
+            <div class="day-metric"><span>Índice UV máximo</span><strong>${uvMaximum != null ? uvMaximum.toFixed(1) : '—'}</strong></div>
+            <div class="day-metric"><span>Lluvia acumulada</span><strong>${rainAccumulated != null ? rainAccumulated.toFixed(1) + ' mm' : '—'}</strong></div>
+          </div>
         </div>
-      </div>`;
+      </article>`;
   });
   html += '</div></div>';
 
@@ -1684,35 +1752,6 @@ function renderTable(data){
    Todos los addEventListener de la app se registran acá, y esta
    función solo se llama desde initApp(), cuando el DOM ya existe.
    ============================================================ */
-function renderSettings(){
-  const panel = document.getElementById('tab-ajustes');
-  if(!panel) return;
-  if(!backgroundManager) return;
-  const settings = backgroundManager.settings;
-  const options = (window.AEROCLIMA_BACKGROUNDS || []).map(item => `<option value="${item.id}">${item.label}</option>`).join('');
-  panel.innerHTML = `
-    <div class="glass card settings-card">
-      <div class="card-title">Apariencia</div>
-      <label class="setting-row"><span><strong>Tema</strong><small>Claro, oscuro o según la hora</small></span><select id="theme-mode"><option value="light">Claro</option><option value="dark">Oscuro</option><option value="auto">Automático</option></select></label>
-      <label class="setting-row"><span><strong>Fondo modo claro</strong><small>Vista local para momentos luminosos</small></span><select id="light-background">${options}</select></label>
-      <div class="background-preview" id="light-preview"></div>
-      <label class="setting-row"><span><strong>Fondo modo oscuro</strong><small>Vista local para la noche</small></span><select id="dark-background">${options}</select></label>
-      <div class="background-preview is-dark" id="dark-preview"></div>
-      <label class="setting-row"><span><strong>Animaciones</strong><small>Transiciones lentas y discretas</small></span><select id="animation-mode"><option value="normal">Normales</option><option value="reduced">Reducidas</option></select></label>
-      <button class="aero-btn primary settings-refresh" id="reset-appearance-btn">Restablecer apariencia</button>
-    </div>`;
-  const theme = document.getElementById('theme-mode'), light = document.getElementById('light-background'), dark = document.getElementById('dark-background'), animation = document.getElementById('animation-mode');
-  theme.value=settings.theme; light.value=settings.lightBackground; dark.value=settings.darkBackground; animation.value=settings.animations;
-  const preview = (id, mode, background) => { document.getElementById(id).style.backgroundImage=`url("assets/backgrounds/${mode}/${background}.webp")`; };
-  const sync = () => { backgroundManager.syncTheme(document.body.classList.contains('night')); preview('light-preview','light',backgroundManager.settings.lightBackground); preview('dark-preview','dark',backgroundManager.settings.darkBackground); };
-  theme.addEventListener('change', e => { backgroundManager.setSetting('theme',e.target.value); manualOverride=e.target.value !== 'auto'; if(e.target.value === 'auto') updateDayNightAuto(); else sync(); });
-  light.addEventListener('change', e => { backgroundManager.setSetting('lightBackground',e.target.value); sync(); });
-  dark.addEventListener('change', e => { backgroundManager.setSetting('darkBackground',e.target.value); sync(); });
-  animation.addEventListener('change', e => { backgroundManager.setSetting('animations',e.target.value); sync(); });
-  document.getElementById('reset-appearance-btn').addEventListener('click', () => { backgroundManager.reset(); manualOverride=false; updateDayNightAuto(); renderSettings(); });
-  sync();
-}
-
 function registerEventListeners(){
   try{
     document.getElementById('daynight-switch').addEventListener('click', () => {
@@ -1734,6 +1773,13 @@ function registerEventListeners(){
         btn.classList.add('active');
         if(lastGeneralData) renderPronostico(lastGeneralData, parseInt(btn.dataset.range,10));
       });
+    });
+    document.getElementById('pronostico-content').addEventListener('click', event => {
+      const toggle = event.target.closest('[data-forecast-toggle]');
+      if(!toggle || !lastGeneralData) return;
+      const day = toggle.dataset.forecastToggle;
+      expandedForecastDay = expandedForecastDay === day ? null : day;
+      renderPronostico(lastGeneralData, lastRangeDays);
     });
 
     document.getElementById('use-loc-btn').addEventListener('click', () => useMyLocation(false));
@@ -1789,7 +1835,7 @@ async function initApp(){
 
     // 4. Eventos de la interfaz
     renderTabIcons();
-    renderSettings();
+    updateGreeting();
     registerEventListeners();
 
     // 5. Geolocalización: usa el permiso si ya está concedido, muestra el
@@ -1803,6 +1849,7 @@ async function initApp(){
 
     // 8. Actualización visual periódica del tema día/noche
     setInterval(updateDayNightAuto, 5 * 60 * 1000);
+    setInterval(updateGreeting, 60 * 1000);
 
     registerServiceWorker();
   }catch(e){
